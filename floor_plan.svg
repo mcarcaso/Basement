@@ -1,0 +1,225 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 920" width="720" height="920">
+  <style>
+    .wall { stroke: #222; stroke-width: 4; fill: none; }
+    .grid { stroke: #ddd; stroke-width: 0.5; }
+    .grid-major { stroke: #bbb; stroke-width: 1; }
+    .grid-label { font-family: monospace; font-size: 10px; fill: #999; text-anchor: middle; }
+    .grid-label-y { font-family: monospace; font-size: 10px; fill: #999; text-anchor: end; }
+    .dim-line { stroke: #c44; stroke-width: 1; marker-start: url(#arrow-left); marker-end: url(#arrow-right); }
+    .dim-text { font-family: Arial, sans-serif; font-size: 11px; fill: #c44; text-anchor: middle; }
+    .room-label { font-family: Arial, sans-serif; font-size: 15px; font-weight: bold; fill: #333; text-anchor: middle; }
+    .room-size { font-family: Arial, sans-serif; font-size: 10px; fill: #777; text-anchor: middle; }
+    .room-fill-kitchen { fill: rgba(200,230,200,0.5); }
+    .room-fill-furnace { fill: rgba(240,220,200,0.5); }
+    .room-fill-hall { fill: rgba(250,245,230,0.5); }
+    .room-fill-bath { fill: rgba(200,230,240,0.5); }
+    .room-fill-empty { fill: rgba(240,240,240,0.5); }
+    .room-fill-main { fill: rgba(200,200,240,0.5); }
+  </style>
+
+  <defs>
+    <marker id="arrow-left" markerWidth="6" markerHeight="6" refX="6" refY="3" orient="auto">
+      <path d="M6,0 L0,3 L6,6" fill="none" stroke="#c44" stroke-width="1"/>
+    </marker>
+    <marker id="arrow-right" markerWidth="6" markerHeight="6" refX="0" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6" fill="none" stroke="#c44" stroke-width="1"/>
+    </marker>
+  </defs>
+
+  <g transform="translate(50, 40)">
+
+    <!-- Grid: 2px/inch. Total: 272" wide (544px) x 389" tall (778px) -->
+    <!-- Grid every foot (24px), bold every 5ft -->
+
+    <!-- Vertical grid lines (0-23ft) -->
+    <line x1="0" y1="0" x2="0" y2="792" class="grid-major"/>
+    <line x1="24" y1="0" x2="24" y2="792" class="grid"/>
+    <line x1="48" y1="0" x2="48" y2="792" class="grid"/>
+    <line x1="72" y1="0" x2="72" y2="792" class="grid"/>
+    <line x1="96" y1="0" x2="96" y2="792" class="grid"/>
+    <line x1="120" y1="0" x2="120" y2="792" class="grid-major"/>
+    <line x1="144" y1="0" x2="144" y2="792" class="grid"/>
+    <line x1="168" y1="0" x2="168" y2="792" class="grid"/>
+    <line x1="192" y1="0" x2="192" y2="792" class="grid"/>
+    <line x1="216" y1="0" x2="216" y2="792" class="grid"/>
+    <line x1="240" y1="0" x2="240" y2="792" class="grid-major"/>
+    <line x1="264" y1="0" x2="264" y2="792" class="grid"/>
+    <line x1="288" y1="0" x2="288" y2="792" class="grid"/>
+    <line x1="312" y1="0" x2="312" y2="792" class="grid"/>
+    <line x1="336" y1="0" x2="336" y2="792" class="grid"/>
+    <line x1="360" y1="0" x2="360" y2="792" class="grid-major"/>
+    <line x1="384" y1="0" x2="384" y2="792" class="grid"/>
+    <line x1="408" y1="0" x2="408" y2="792" class="grid"/>
+    <line x1="432" y1="0" x2="432" y2="792" class="grid"/>
+    <line x1="456" y1="0" x2="456" y2="792" class="grid"/>
+    <line x1="480" y1="0" x2="480" y2="792" class="grid-major"/>
+    <line x1="504" y1="0" x2="504" y2="792" class="grid"/>
+    <line x1="528" y1="0" x2="528" y2="792" class="grid"/>
+    <line x1="552" y1="0" x2="552" y2="792" class="grid"/>
+
+    <!-- Horizontal grid lines (0-33ft) -->
+    <line x1="0" y1="0" x2="552" y2="0" class="grid-major"/>
+    <line x1="0" y1="24" x2="552" y2="24" class="grid"/>
+    <line x1="0" y1="48" x2="552" y2="48" class="grid"/>
+    <line x1="0" y1="72" x2="552" y2="72" class="grid"/>
+    <line x1="0" y1="96" x2="552" y2="96" class="grid"/>
+    <line x1="0" y1="120" x2="552" y2="120" class="grid-major"/>
+    <line x1="0" y1="144" x2="552" y2="144" class="grid"/>
+    <line x1="0" y1="168" x2="552" y2="168" class="grid"/>
+    <line x1="0" y1="192" x2="552" y2="192" class="grid"/>
+    <line x1="0" y1="216" x2="552" y2="216" class="grid"/>
+    <line x1="0" y1="240" x2="552" y2="240" class="grid-major"/>
+    <line x1="0" y1="264" x2="552" y2="264" class="grid"/>
+    <line x1="0" y1="288" x2="552" y2="288" class="grid"/>
+    <line x1="0" y1="312" x2="552" y2="312" class="grid"/>
+    <line x1="0" y1="336" x2="552" y2="336" class="grid"/>
+    <line x1="0" y1="360" x2="552" y2="360" class="grid-major"/>
+    <line x1="0" y1="384" x2="552" y2="384" class="grid"/>
+    <line x1="0" y1="408" x2="552" y2="408" class="grid"/>
+    <line x1="0" y1="432" x2="552" y2="432" class="grid"/>
+    <line x1="0" y1="456" x2="552" y2="456" class="grid"/>
+    <line x1="0" y1="480" x2="552" y2="480" class="grid-major"/>
+    <line x1="0" y1="504" x2="552" y2="504" class="grid"/>
+    <line x1="0" y1="528" x2="552" y2="528" class="grid"/>
+    <line x1="0" y1="552" x2="552" y2="552" class="grid"/>
+    <line x1="0" y1="576" x2="552" y2="576" class="grid"/>
+    <line x1="0" y1="600" x2="552" y2="600" class="grid-major"/>
+    <line x1="0" y1="624" x2="552" y2="624" class="grid"/>
+    <line x1="0" y1="648" x2="552" y2="648" class="grid"/>
+    <line x1="0" y1="672" x2="552" y2="672" class="grid"/>
+    <line x1="0" y1="696" x2="552" y2="696" class="grid"/>
+    <line x1="0" y1="720" x2="552" y2="720" class="grid-major"/>
+    <line x1="0" y1="744" x2="552" y2="744" class="grid"/>
+    <line x1="0" y1="768" x2="552" y2="768" class="grid"/>
+    <line x1="0" y1="792" x2="552" y2="792" class="grid-major"/>
+
+    <!-- X labels (feet) -->
+    <text x="0" y="-8" class="grid-label">0</text>
+    <text x="120" y="-8" class="grid-label">5</text>
+    <text x="240" y="-8" class="grid-label">10</text>
+    <text x="360" y="-8" class="grid-label">15</text>
+    <text x="480" y="-8" class="grid-label">20</text>
+
+    <!-- Y labels (feet) -->
+    <text x="-6" y="4" class="grid-label-y">0</text>
+    <text x="-6" y="124" class="grid-label-y">5</text>
+    <text x="-6" y="244" class="grid-label-y">10</text>
+    <text x="-6" y="364" class="grid-label-y">15</text>
+    <text x="-6" y="484" class="grid-label-y">20</text>
+    <text x="-6" y="604" class="grid-label-y">25</text>
+    <text x="-6" y="724" class="grid-label-y">30</text>
+
+    <!-- ========== ROOM FILLS ========== -->
+    <!-- Kitchen: 135x159 at (0,0) -->
+    <rect x="0" y="0" width="270" height="318" class="room-fill-kitchen"/>
+    <!-- Furnace: 75x73 at (0,318) -->
+    <rect x="0" y="318" width="150" height="146" class="room-fill-furnace"/>
+    <!-- Hall: 60x73 at (150,318) -->
+    <rect x="150" y="318" width="120" height="146" class="room-fill-hall"/>
+    <!-- Empty: 16x50 at (0,464) -->
+    <rect x="0" y="464" width="32" height="100" class="room-fill-empty"/>
+    <!-- Bath: 119x50 at (32,464) -->
+    <rect x="32" y="464" width="238" height="100" class="room-fill-bath"/>
+    <!-- Garage: 135x107 at (0,564) -->
+    <rect x="0" y="564" width="270" height="214" class="room-fill-empty"/>
+    <!-- Main Room: 137x389 at (270,0) -->
+    <rect x="270" y="0" width="274" height="778" class="room-fill-main"/>
+
+    <!-- ========== WALLS ========== -->
+
+    <!-- === Outer perimeter === -->
+    <!-- Top wall (full width) -->
+    <line x1="0" y1="0" x2="544" y2="0" class="wall"/>
+    <!-- Left wall (full height including garage) -->
+    <line x1="0" y1="0" x2="0" y2="778" class="wall"/>
+    <!-- Bottom of garage -->
+    <line x1="0" y1="778" x2="270" y2="778" class="wall"/>
+    <!-- Right wall (full height) -->
+    <line x1="544" y1="0" x2="544" y2="778" class="wall"/>
+    <!-- Bottom of main room: left portion (wall) -->
+    <line x1="270" y1="778" x2="310" y2="778" class="wall"/>
+    <!-- Entry door 34" (68px) closer to left wall -->
+    <line x1="310" y1="778" x2="378" y2="778" stroke="#888" stroke-width="2" stroke-dasharray="6,4" fill="none"/>
+    <path d="M 310 778 Q 310 710 378 710" stroke="#888" stroke-width="1.5" fill="none"/>
+    <!-- Bottom of main room: right portion (wall) -->
+    <line x1="378" y1="778" x2="544" y2="778" class="wall"/>
+    <!-- Main room left wall below left side -->
+    <line x1="270" y1="564" x2="270" y2="778" class="wall"/>
+
+    <!-- === Shared wall at x=270 (left/right divider) === -->
+    <!-- Solid: top to 3" into hall (y=0 to y=324) -->
+    <line x1="270" y1="0" x2="270" y2="324" class="wall"/>
+    <!-- 34" door opening (y=324 to y=392) -->
+    <line x1="270" y1="324" x2="270" y2="392" stroke="#888" stroke-width="2" stroke-dasharray="6,4" fill="none"/>
+    <!-- Door arc (swings into main room) -->
+    <path d="M 270 324 Q 338 324 338 392" stroke="#888" stroke-width="1.5" fill="none"/>
+    <!-- Solid: below door to bottom of left side (y=392 to y=564) -->
+    <line x1="270" y1="392" x2="270" y2="564" class="wall"/>
+
+    <!-- === Left side internal walls === -->
+    <!-- Kitchen bottom (furnace top only, hall top is open) -->
+    <line x1="0" y1="318" x2="150" y2="318" class="wall"/>
+    <!-- Furnace right wall: top portion -->
+    <line x1="150" y1="318" x2="150" y2="357" class="wall"/>
+    <!-- 34" door opening (68px) roughly centered -->
+    <line x1="150" y1="357" x2="150" y2="425" stroke="#888" stroke-width="2" stroke-dasharray="6,4" fill="none"/>
+    <path d="M 150 357 Q 218 357 218 425" stroke="#888" stroke-width="1.5" fill="none"/>
+    <!-- Furnace right wall: bottom portion -->
+    <line x1="150" y1="425" x2="150" y2="464" class="wall"/>
+    <!-- Furnace bottom wall -->
+    <line x1="0" y1="464" x2="150" y2="464" class="wall"/>
+    <!-- Bath bottom / Garage top wall -->
+    <line x1="0" y1="564" x2="270" y2="564" class="wall"/>
+    <!-- Hall/Bath wall: left portion -->
+    <line x1="150" y1="464" x2="177" y2="464" class="wall"/>
+    <!-- 34" door to bath (centered in hall width) -->
+    <line x1="177" y1="464" x2="245" y2="464" stroke="#888" stroke-width="2" stroke-dasharray="6,4" fill="none"/>
+    <!-- Door arc (swings into bath) -->
+    <path d="M 177 464 Q 177 532 245 532" stroke="#888" stroke-width="1.5" fill="none"/>
+    <!-- Hall/Bath wall: right portion -->
+    <line x1="245" y1="464" x2="270" y2="464" class="wall"/>
+    <!-- Empty/Bath divider -->
+    <line x1="32" y1="464" x2="32" y2="564" class="wall"/>
+
+    <!-- ========== ROOM LABELS ========== -->
+    <text x="135" y="155" class="room-label">Kitchen</text>
+    <text x="135" y="172" class="room-size">135" x 159"</text>
+
+    <text x="75" y="388" class="room-label">Furnace</text>
+    <text x="75" y="405" class="room-size">75" x 73"</text>
+
+    <text x="210" y="388" class="room-label">Hall</text>
+    <text x="210" y="405" class="room-size">60" x 73"</text>
+
+    <text x="16" y="518" class="room-size" font-size="9">16"x50"</text>
+
+    <text x="151" y="518" class="room-label">Bath</text>
+    <text x="151" y="535" class="room-size">119" x 50"</text>
+
+    <text x="135" y="675" class="room-label">Garage</text>
+    <text x="135" y="692" class="room-size">135" x 107"</text>
+
+    <text x="407" y="385" class="room-label">Main Room</text>
+    <text x="407" y="405" class="room-size">137" x 389"</text>
+
+    <!-- ========== DIMENSION LINES ========== -->
+    <!-- Top: left side width -->
+    <line x1="0" y1="-20" x2="270" y2="-20" class="dim-line"/>
+    <text x="135" y="-25" class="dim-text">135"</text>
+    <!-- Top: right side width -->
+    <line x1="270" y1="-20" x2="544" y2="-20" class="dim-line"/>
+    <text x="407" y="-25" class="dim-text">137"</text>
+
+    <!-- Left height -->
+    <line x1="-25" y1="0" x2="-25" y2="564" class="dim-line"/>
+    <text x="-30" y="287" class="dim-text" transform="rotate(-90,-30,287)">282"</text>
+
+    <!-- Right height -->
+    <line x1="559" y1="0" x2="559" y2="778" class="dim-line"/>
+    <text x="564" y="394" class="dim-text" transform="rotate(90,564,394)">389"</text>
+
+    <!-- Scale note -->
+    <text x="272" y="820" class="grid-label" font-size="11">Grid = 1 ft squares | 2px per inch | Combined floor plan</text>
+
+  </g>
+</svg>
