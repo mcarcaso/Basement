@@ -101,10 +101,12 @@ function makeSink(start, length) {
   top.position.set(COUNTER_DEPTH / 2, CABINET_HEIGHT + COUNTER_TOP_THICKNESS / 2, start + length / 2);
   group.add(top);
 
-  // Sink basin (recessed)
-  const basinGeo = new THREE.BoxGeometry(COUNTER_DEPTH - 6, COUNTER_TOP_THICKNESS + 1, length - 6);
+  // Sink basin — sits just above the counter (rim on top, basin extends down)
+  // Rim at counter top level (CABINET_HEIGHT + COUNTER_TOP_THICKNESS = 36)
+  const basinH = 7;
+  const basinGeo = new THREE.BoxGeometry(COUNTER_DEPTH - 8, basinH, length - 8);
   const basin = new THREE.Mesh(basinGeo, materials.sinkBasin);
-  basin.position.set(COUNTER_DEPTH / 2, CABINET_HEIGHT + 0.5, start + length / 2);
+  basin.position.set(COUNTER_DEPTH / 2, 36 - basinH / 2 + 0.1, start + length / 2);
   group.add(basin);
 
   // Faucet
@@ -155,24 +157,24 @@ function makeWasherDryer() {
   washer.position.set(0, WASHER_HEIGHT / 2, 0);
   group.add(washer);
 
-  // Washer door (circle on front)
+  // Washer door (circle on front, offset slightly inward so back disk isn't coplanar)
   const washerDoorGeo = new THREE.CylinderGeometry(10, 10, 1, 24);
   const washerDoor = new THREE.Mesh(washerDoorGeo, materials.washerDoor);
   washerDoor.rotation.x = Math.PI / 2;
-  washerDoor.position.set(0, WASHER_HEIGHT / 2, -WASHER_DRYER_DEPTH / 2 + 0.5);
+  washerDoor.position.set(0, WASHER_HEIGHT / 2, -WASHER_DRYER_DEPTH / 2 - 0.49);
   group.add(washerDoor);
 
-  // Dryer (top)
+  // Dryer (top) — tiny gap above washer
   const dryerGeo = new THREE.BoxGeometry(WASHER_DRYER_WIDTH, DRYER_HEIGHT, WASHER_DRYER_DEPTH);
   const dryer = new THREE.Mesh(dryerGeo, materials.washer);
-  dryer.position.set(0, WASHER_HEIGHT + DRYER_HEIGHT / 2, 0);
+  dryer.position.set(0, WASHER_HEIGHT + 0.1 + DRYER_HEIGHT / 2, 0);
   group.add(dryer);
 
   // Dryer door
   const dryerDoorGeo = new THREE.CylinderGeometry(10, 10, 1, 24);
   const dryerDoor = new THREE.Mesh(dryerDoorGeo, materials.washerDoor);
   dryerDoor.rotation.x = Math.PI / 2;
-  dryerDoor.position.set(0, WASHER_HEIGHT + DRYER_HEIGHT / 2, -WASHER_DRYER_DEPTH / 2 + 0.5);
+  dryerDoor.position.set(0, WASHER_HEIGHT + 0.1 + DRYER_HEIGHT / 2, -WASHER_DRYER_DEPTH / 2 - 0.49);
   group.add(dryerDoor);
 
   return group;
@@ -270,6 +272,17 @@ function makeEastWallCabinets(startZ, lengthZ) {
 export function buildKitchen() {
   const group = new THREE.Group();
 
+  // Bulkhead: west wall, 45" wide (x=0 to 45), full length of kitchen (z=0 to 159)
+  // Hangs from ceiling (84") down 12"
+  const BULKHEAD_W = 45;
+  const BULKHEAD_DROP = 12;
+  const BULKHEAD_L = 159;
+  const bulkheadGeo = new THREE.BoxGeometry(BULKHEAD_W, BULKHEAD_DROP, BULKHEAD_L);
+  const bulkheadMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.9 });
+  const bulkhead = new THREE.Mesh(bulkheadGeo, bulkheadMat);
+  bulkhead.position.set(BULKHEAD_W / 2, 84 - BULKHEAD_DROP / 2, BULKHEAD_L / 2);
+  group.add(bulkhead);
+
   for (const f of fixtures) {
     let mesh;
     switch (f.type) {
@@ -293,8 +306,9 @@ export function buildKitchen() {
   // South wall is at z=159, placed against the wall, offset from west wall
   const wd = makeWasherDryer();
   // Position: centered on its x, against south wall, a bit away from the west wall corner
-  // Against south wall (z=159), as far right as possible while staying over furnace (x=0 to 75)
-  wd.position.set(75 - WASHER_DRYER_WIDTH / 2 - 2, 0, 159 - WASHER_DRYER_DEPTH / 2);
+  // Against south wall (front face of wall is at z=157 since wall is 4" thick)
+  // Back of unit at z=156.5 (0.5" gap from wall front)
+  wd.position.set(75 - WASHER_DRYER_WIDTH / 2 - 2, 0, 156.5 - WASHER_DRYER_DEPTH / 2);
   group.add(wd);
 
   // West wall upper cabinets (skip stove area z=24-54, get range hood instead)

@@ -1,7 +1,7 @@
 // All measurements in inches. Origin is top-left of the floor plan.
 // In Three.js: x = floor plan x, z = floor plan y (depth into screen), y = up.
 
-export const WALL_HEIGHT = 96; // 8 feet
+export const WALL_HEIGHT = 84; // 7 feet
 export const WALL_THICKNESS = 4;
 
 export const rooms = [
@@ -61,8 +61,9 @@ export const rooms = [
 
 export const walls = [
   // === EXTERIOR ===
-  // Top wall (north)
-  { x1: 0, z1: 0, x2: 272, z2: 0 },
+  // Top wall (north) with door opening in kitchen (x=60 to x=90, 30" door)
+  { x1: 0, z1: 0, x2: 60, z2: 0 },
+  { x1: 90, z1: 0, x2: 272, z2: 0 },
   // Left wall (west) full height
   { x1: 0, z1: 0, x2: 0, z2: 389 },
   // Right wall (east)
@@ -70,10 +71,10 @@ export const walls = [
   // Bottom-left wall (garage south)
   { x1: 0, z1: 389, x2: 135, z2: 389 },
   // Bottom-right wall (main room south) with entry door
-  // 20" of wall, then 34" door, then rest
-  { x1: 135, z1: 389, x2: 155, z2: 389 },
-  // door gap: 155 to 189
-  { x1: 189, z1: 389, x2: 272, z2: 389 },
+  // 16" of wall, then 30" door, then rest
+  { x1: 135, z1: 389, x2: 151, z2: 389 },
+  // door gap: 151 to 181
+  { x1: 181, z1: 389, x2: 272, z2: 389 },
 
   // === INTERIOR ===
   // Kitchen bottom / furnace top (only across furnace, hall top is open)

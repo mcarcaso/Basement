@@ -8,6 +8,8 @@ import { buildFurnace } from "./furnace.js";
 import { buildBathroom } from "./bathroom.js";
 import { buildBedroom } from "./bedroom.js";
 import { buildLivingRoom } from "./livingroom.js";
+import { buildDoors } from "./doors.js";
+import { buildEntrance } from "./entrance.js";
 import { GLTFExporter } from "three/addons/exporters/GLTFExporter.js";
 
 // Scene
@@ -22,6 +24,7 @@ const camera = new THREE.PerspectiveCamera(
   5000
 );
 camera.position.set(136, 400, 500);
+camera.rotation.order = "YXZ"; // yaw then pitch (FPS style)
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -41,9 +44,9 @@ orbitControls.update();
 
 // FPS mode
 const fpsControls = new PointerLockControls(camera, renderer.domElement);
-const EYE_HEIGHT = 66; // 5'6" eye level
-const MOVE_SPEED = 300; // inches per second
-const SPRINT_MULTIPLIER = 3;
+const EYE_HEIGHT = 60;
+const MOVE_SPEED = 900; // inches per second
+const TURN_SPEED = 2.5; // radians per second
 
 let mode = "orbit"; // "orbit" or "fps"
 const keys = {};
@@ -51,12 +54,36 @@ const velocity = new THREE.Vector3();
 const direction = new THREE.Vector3();
 let prevTime = performance.now();
 
+// Touch device detection
+const isTouchDevice = ("ontouchstart" in window) || navigator.maxTouchPoints > 0;
+
+// Touch input state
+const touchInput = {
+  moveX: 0, // -1 to 1 (strafe)
+  moveY: 0, // -1 to 1 (forward/back)
+  lookDX: 0, // look yaw delta (consumed per frame)
+  lookDY: 0, // look pitch delta (consumed per frame)
+};
+
 // HUD
 const hud = document.createElement("div");
 hud.style.cssText =
   "position:fixed;top:16px;left:50%;transform:translateX(-50%);color:#fff;font:14px monospace;background:rgba(0,0,0,0.6);padding:8px 16px;border-radius:6px;z-index:10;pointer-events:none;text-align:center;";
-hud.textContent = "Orbit Mode — Press F to enter FPS walkthrough";
+hud.textContent = isTouchDevice
+  ? "Orbit Mode — tap FPS button to walk through"
+  : "Orbit Mode — Press F to enter FPS walkthrough";
 document.body.appendChild(hud);
+
+// Enter FPS button (visible always, works on mobile and desktop)
+const fpsButton = document.createElement("button");
+fpsButton.textContent = "Enter FPS";
+fpsButton.style.cssText =
+  "position:fixed;bottom:16px;left:16px;padding:12px 20px;font:14px monospace;background:#444;color:#fff;border:1px solid #666;border-radius:6px;cursor:pointer;z-index:11;touch-action:manipulation;";
+fpsButton.addEventListener("click", () => {
+  if (mode === "orbit") enterFPS();
+  else exitFPS();
+});
+document.body.appendChild(fpsButton);
 
 // Crosshair (FPS only)
 const crosshair = document.createElement("div");
@@ -66,30 +93,189 @@ crosshair.innerHTML =
   '<svg width="20" height="20"><circle cx="10" cy="10" r="3" fill="none" stroke="white" stroke-width="1"/><line x1="10" y1="2" x2="10" y2="7" stroke="white" stroke-width="1"/><line x1="10" y1="13" x2="10" y2="18" stroke="white" stroke-width="1"/><line x1="2" y1="10" x2="7" y2="10" stroke="white" stroke-width="1"/><line x1="13" y1="10" x2="18" y2="10" stroke="white" stroke-width="1"/></svg>';
 document.body.appendChild(crosshair);
 
+// === Touch UI: virtual joystick + look area ===
+const touchUI = document.createElement("div");
+touchUI.style.cssText =
+  "position:fixed;inset:0;z-index:9;display:none;pointer-events:none;";
+document.body.appendChild(touchUI);
+
+// Joystick base (bottom left)
+const joyBase = document.createElement("div");
+joyBase.style.cssText =
+  "position:absolute;left:30px;bottom:30px;width:120px;height:120px;border-radius:60px;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.4);pointer-events:auto;touch-action:none;";
+touchUI.appendChild(joyBase);
+
+const joyKnob = document.createElement("div");
+joyKnob.style.cssText =
+  "position:absolute;left:30px;top:30px;width:60px;height:60px;border-radius:30px;background:rgba(255,255,255,0.5);pointer-events:none;";
+joyBase.appendChild(joyKnob);
+
+// Right side: look / tap area (transparent overlay)
+const lookArea = document.createElement("div");
+lookArea.style.cssText =
+  "position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:auto;touch-action:none;";
+touchUI.appendChild(lookArea);
+// Layer joystick above lookArea
+joyBase.style.zIndex = "2";
+lookArea.style.zIndex = "1";
+
+// Joystick state
+let joyActive = false;
+let joyPointerId = null;
+const JOY_RADIUS = 50;
+
+function setJoyKnob(dx, dy) {
+  joyKnob.style.left = `${30 + dx}px`;
+  joyKnob.style.top = `${30 + dy}px`;
+}
+
+joyBase.addEventListener("pointerdown", (e) => {
+  e.preventDefault();
+  joyActive = true;
+  joyPointerId = e.pointerId;
+  joyBase.setPointerCapture(e.pointerId);
+});
+
+joyBase.addEventListener("pointermove", (e) => {
+  if (!joyActive || e.pointerId !== joyPointerId) return;
+  const rect = joyBase.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  let dx = e.clientX - cx;
+  let dy = e.clientY - cy;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  if (dist > JOY_RADIUS) {
+    dx = (dx / dist) * JOY_RADIUS;
+    dy = (dy / dist) * JOY_RADIUS;
+  }
+  setJoyKnob(dx, dy);
+  touchInput.moveX = dx / JOY_RADIUS;
+  touchInput.moveY = dy / JOY_RADIUS;
+});
+
+function resetJoy() {
+  joyActive = false;
+  joyPointerId = null;
+  setJoyKnob(0, 0);
+  touchInput.moveX = 0;
+  touchInput.moveY = 0;
+}
+
+joyBase.addEventListener("pointerup", resetJoy);
+joyBase.addEventListener("pointercancel", resetJoy);
+
+// Look/tap area state
+let lookPointerId = null;
+let lookLastX = 0;
+let lookLastY = 0;
+let lookStartX = 0;
+let lookStartY = 0;
+let lookStartTime = 0;
+let lookMoved = false;
+const TAP_MOVE_THRESHOLD = 10; // pixels
+const TAP_TIME_THRESHOLD = 300; // ms
+const LOOK_SENSITIVITY = 0.004;
+
+lookArea.addEventListener("pointerdown", (e) => {
+  if (lookPointerId !== null) return;
+  lookPointerId = e.pointerId;
+  lookLastX = e.clientX;
+  lookLastY = e.clientY;
+  lookStartX = e.clientX;
+  lookStartY = e.clientY;
+  lookStartTime = performance.now();
+  lookMoved = false;
+  lookArea.setPointerCapture(e.pointerId);
+});
+
+lookArea.addEventListener("pointermove", (e) => {
+  if (e.pointerId !== lookPointerId) return;
+  const dx = e.clientX - lookLastX;
+  const dy = e.clientY - lookLastY;
+  lookLastX = e.clientX;
+  lookLastY = e.clientY;
+  touchInput.lookDX += dx;
+  touchInput.lookDY += dy;
+  const totalDX = Math.abs(e.clientX - lookStartX);
+  const totalDY = Math.abs(e.clientY - lookStartY);
+  if (totalDX + totalDY > TAP_MOVE_THRESHOLD) lookMoved = true;
+});
+
+lookArea.addEventListener("pointerup", (e) => {
+  if (e.pointerId !== lookPointerId) return;
+  const elapsed = performance.now() - lookStartTime;
+  if (!lookMoved && elapsed < TAP_TIME_THRESHOLD) {
+    // Treat as tap: toggle door under crosshair
+    tryToggleDoor();
+  }
+  lookPointerId = null;
+});
+
+lookArea.addEventListener("pointercancel", () => {
+  lookPointerId = null;
+});
+
 function enterFPS() {
   mode = "fps";
   orbitControls.enabled = false;
+  ceiling.visible = true;
 
   // Place camera at eye height in the kitchen
   camera.position.set(68, EYE_HEIGHT, 80);
   camera.rotation.set(0, 0, 0);
 
-  fpsControls.lock();
+  if (isTouchDevice) {
+    touchUI.style.display = "block";
+    hud.textContent = "FPS — joystick to move, drag to look, tap door to open";
+  } else {
+    fpsControls.lock();
+    hud.textContent = "FPS — WASD/Arrows to move, ←/→ to turn, Space = door, Esc to exit";
+  }
   crosshair.style.display = "block";
-  hud.textContent = "FPS Mode — WASD to move, Shift to sprint, Esc to exit";
+  fpsButton.textContent = "Exit FPS";
 }
 
 function exitFPS() {
   mode = "orbit";
   orbitControls.enabled = true;
-  fpsControls.unlock();
+  ceiling.visible = false;
+  if (isTouchDevice) {
+    touchUI.style.display = "none";
+  } else {
+    fpsControls.unlock();
+  }
   crosshair.style.display = "none";
-  hud.textContent = "Orbit Mode — Press F to enter FPS walkthrough";
+  hud.textContent = isTouchDevice
+    ? "Orbit Mode — tap FPS button to walk through"
+    : "Orbit Mode — Press F to enter FPS walkthrough";
+  fpsButton.textContent = "Enter FPS";
 
   // Reset orbit to look at center from above
   camera.position.set(136, 400, 500);
   orbitControls.target.set(136, 0, 194);
   orbitControls.update();
+}
+
+// Raycaster for door interaction
+const raycaster = new THREE.Raycaster();
+const centerScreen = new THREE.Vector2(0, 0);
+const MAX_INTERACT_DISTANCE = 80; // inches
+
+function tryToggleDoor() {
+  raycaster.setFromCamera(centerScreen, camera);
+  const panels = allDoors.flatMap((d) => d.children);
+  const hits = raycaster.intersectObjects(panels, false);
+  for (const hit of hits) {
+    if (hit.distance > MAX_INTERACT_DISTANCE) break;
+    const doorGroup = hit.object.userData.doorGroup;
+    if (doorGroup && doorGroup.userData.isDoor) {
+      doorGroup.userData.isOpen = !doorGroup.userData.isOpen;
+      doorGroup.userData.targetRotation = doorGroup.userData.isOpen
+        ? doorGroup.userData.openRotation
+        : doorGroup.userData.closedRotation;
+      return;
+    }
+  }
 }
 
 // Key handling
@@ -98,6 +284,11 @@ document.addEventListener("keydown", (e) => {
 
   if (e.code === "KeyF" && mode === "orbit") {
     enterFPS();
+  }
+
+  if (e.code === "Space" && mode === "fps" && fpsControls.isLocked) {
+    e.preventDefault();
+    tryToggleDoor();
   }
 });
 
@@ -204,7 +395,32 @@ scene.add(bedroom);
 const livingRoom = buildLivingRoom();
 scene.add(livingRoom);
 
-// Ceiling removed for birds-eye visibility
+// Build doors
+const doors = buildDoors();
+scene.add(doors);
+
+// Build basement entrance (stairs/pit on north side of kitchen)
+const entrance = buildEntrance();
+scene.add(entrance);
+
+// Collect all toggleable doors
+const allDoors = [
+  ...doors.userData.toggleableDoors,
+  entrance.userData.entranceDoor,
+];
+
+// Ceiling (visible only in FPS mode)
+const ceilingGeo = new THREE.PlaneGeometry(600, 600);
+const ceilingMat = new THREE.MeshStandardMaterial({
+  color: 0xeeeeee,
+  roughness: 1,
+  side: THREE.DoubleSide,
+});
+const ceiling = new THREE.Mesh(ceilingGeo, ceilingMat);
+ceiling.rotation.x = -Math.PI / 2;
+ceiling.position.set(136, 84, 194); // 7ft ceiling
+ceiling.visible = false;
+scene.add(ceiling);
 
 // Ground plane
 const groundGeo = new THREE.PlaneGeometry(600, 600);
@@ -257,28 +473,60 @@ function animate() {
   const delta = (time - prevTime) / 1000;
   prevTime = time;
 
-  if (mode === "fps" && fpsControls.isLocked) {
-    const speed = keys["ShiftLeft"] || keys["ShiftRight"]
-      ? MOVE_SPEED * SPRINT_MULTIPLIER
-      : MOVE_SPEED;
-
+  const fpsActive = mode === "fps" && (isTouchDevice || fpsControls.isLocked);
+  if (fpsActive) {
     // Deceleration
     velocity.x -= velocity.x * 10.0 * delta;
     velocity.z -= velocity.z * 10.0 * delta;
 
-    // Input
-    direction.z = (keys["KeyW"] ? 1 : 0) - (keys["KeyS"] ? 1 : 0);
-    direction.x = (keys["KeyD"] ? 1 : 0) - (keys["KeyA"] ? 1 : 0);
+    // Keyboard movement (W/S or arrows; A/D strafe)
+    let forward = (keys["KeyW"] || keys["ArrowUp"] ? 1 : 0) - (keys["KeyS"] || keys["ArrowDown"] ? 1 : 0);
+    let strafe = (keys["KeyD"] ? 1 : 0) - (keys["KeyA"] ? 1 : 0);
+
+    // Touch joystick input (overrides keyboard on touch devices)
+    if (isTouchDevice) {
+      forward = -touchInput.moveY; // up on joystick = forward
+      strafe = touchInput.moveX;
+    }
+
+    direction.z = forward;
+    direction.x = strafe;
     direction.normalize();
 
-    if (keys["KeyW"] || keys["KeyS"]) velocity.z -= direction.z * speed * delta;
-    if (keys["KeyA"] || keys["KeyD"]) velocity.x -= direction.x * speed * delta;
+    if (forward !== 0) velocity.z -= direction.z * MOVE_SPEED * delta;
+    if (strafe !== 0) velocity.x -= direction.x * MOVE_SPEED * delta;
 
     fpsControls.moveRight(-velocity.x * delta);
     fpsControls.moveForward(-velocity.z * delta);
 
+    // Turn with arrow left/right (desktop) or touch drag (mobile)
+    const turn = (keys["ArrowLeft"] ? 1 : 0) - (keys["ArrowRight"] ? 1 : 0);
+    if (turn !== 0) {
+      camera.rotation.y += turn * TURN_SPEED * delta;
+    }
+    if (isTouchDevice && (touchInput.lookDX !== 0 || touchInput.lookDY !== 0)) {
+      camera.rotation.y -= touchInput.lookDX * LOOK_SENSITIVITY;
+      // Optional pitch (clamped)
+      const newPitch = camera.rotation.x - touchInput.lookDY * LOOK_SENSITIVITY;
+      camera.rotation.x = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, newPitch));
+      touchInput.lookDX = 0;
+      touchInput.lookDY = 0;
+    }
+
     // Lock Y to eye height
     camera.position.y = EYE_HEIGHT;
+  }
+
+  // Animate doors toward target rotation
+  const DOOR_SPEED = 6; // radians per second
+  for (const d of allDoors) {
+    const current = d.rotation.y;
+    const target = d.userData.targetRotation;
+    const diff = target - current;
+    if (Math.abs(diff) > 0.001) {
+      const step = Math.sign(diff) * Math.min(Math.abs(diff), DOOR_SPEED * delta);
+      d.rotation.y = current + step;
+    }
   }
 
   if (mode === "orbit") {

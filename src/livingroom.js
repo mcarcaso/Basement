@@ -169,6 +169,19 @@ function makeTV() {
 export function buildLivingRoom() {
   const group = new THREE.Group();
 
+  // Bulkhead: west side (x=135 to 150), from south wall (z=389) up to hall entrance (z=196)
+  // Hangs from ceiling (84") down 12"
+  const BH_W = 15;
+  const BH_DROP = 12;
+  const BH_Z_START = 196; // hall door bottom edge
+  const BH_Z_END = 389;
+  const BH_L = BH_Z_END - BH_Z_START;
+  const bhGeo = new THREE.BoxGeometry(BH_W, BH_DROP, BH_L);
+  const bhMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.9 });
+  const bh = new THREE.Mesh(bhGeo, bhMat);
+  bh.position.set(135 + BH_W / 2, 84 - BH_DROP / 2, BH_Z_START + BH_L / 2);
+  group.add(bh);
+
   // Room bounds: x=135-272, z=123-389
   // Room center x = 203.5
 
