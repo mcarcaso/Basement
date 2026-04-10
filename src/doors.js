@@ -69,13 +69,13 @@ export function buildDoors() {
   group.add(bathDoor);
   toggleableDoors.push(bathDoor);
 
-  // Hall ↔ furnace door
+  // Hall ↔ furnace door — now swings into the furnace room
   const furnaceDoor = placeDoor({
     hingeX: 75,
     hingeZ: 178.5,
     width: 34,
     closedRotation: -Math.PI / 2,
-    openRotation: -Math.PI / 2 + Math.PI / 3,
+    openRotation: -Math.PI / 2 - Math.PI / 3,
   });
   group.add(furnaceDoor);
   toggleableDoors.push(furnaceDoor);
