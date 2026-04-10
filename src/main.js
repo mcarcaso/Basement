@@ -10,7 +10,6 @@ import { buildBedroom } from "./bedroom.js";
 import { buildLivingRoom } from "./livingroom.js";
 import { buildDoors } from "./doors.js";
 import { buildEntrance } from "./entrance.js";
-import { GLTFExporter } from "three/addons/exporters/GLTFExporter.js";
 
 // Scene
 const scene = new THREE.Scene();
@@ -433,30 +432,6 @@ ground.rotation.x = -Math.PI / 2;
 ground.position.y = -0.5;
 ground.receiveShadow = true;
 scene.add(ground);
-
-// Export button
-const exportBtn = document.createElement("button");
-exportBtn.textContent = "Export GLB";
-exportBtn.style.cssText =
-  "position:fixed;bottom:16px;right:16px;padding:10px 20px;font:14px monospace;background:#444;color:#fff;border:1px solid #666;border-radius:6px;cursor:pointer;z-index:10;";
-exportBtn.addEventListener("click", () => {
-  const exporter = new GLTFExporter();
-  exporter.parse(
-    scene,
-    (result) => {
-      const blob = new Blob([result], { type: "application/octet-stream" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "basement.glb";
-      a.click();
-      URL.revokeObjectURL(url);
-    },
-    (error) => console.error("Export failed:", error),
-    { binary: true }
-  );
-});
-document.body.appendChild(exportBtn);
 
 // Handle resize
 window.addEventListener("resize", () => {
